@@ -1,0 +1,8 @@
+{
+  "status": "UP",
+  "cloud": "Azure",
+  "role": "secondary",
+  "region": "eastus",
+  "port": 8082,
+  "service": "twincloud-azure-secondary"
+}

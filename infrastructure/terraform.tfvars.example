@@ -1,0 +1,4 @@
+environment_name = "twincloud-prod"
+aws_region       = "us-east-1"
+azure_region     = "eastus"
+domain_name      = "twincloudops.internal"

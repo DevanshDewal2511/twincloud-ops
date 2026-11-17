@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TwinCloud Ops - AWS Primary</title>
+    <style>
+        :root {
+            --aws-navy: #232F3E;
+            --aws-squid: #131A22;
+            --aws-orange: #FF9900;
+            --aws-accent: #EC7211;
+            --status-green: #10B981;
+            --text-light: #F9FAFB;
+            --text-muted: #9CA3AF;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: #0F172A;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+        }
+        .card {
+            background: #1E293B;
+            border: 1px solid #334155;
+            border-top: 6px solid var(--aws-orange);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            max-width: 580px;
+            width: 100%;
+            padding: 2.5rem;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 1rem;
+        }
+        .title-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .cloud-badge {
+            background-color: var(--aws-orange);
+            color: var(--aws-squid);
+            font-weight: 800;
+            font-size: 0.85rem;
+            padding: 0.3rem 0.65rem;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: var(--status-green);
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--status-green);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--status-green);
+        }
+        .description {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .grid-item {
+            background: #0F172A;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        .label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.35rem;
+        }
+        .value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+        .api-link {
+            display: inline-block;
+            font-size: 0.85rem;
+            color: var(--aws-orange);
+            text-decoration: none;
+            word-break: break-all;
+        }
+        .api-link:hover {
+            text-decoration: underline;
+        }
+        .footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid #334155;
+            padding-top: 1.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="header">
+            <div class="title-group">
+                <span class="cloud-badge">AWS</span>
+                <h1>Primary Simulator</h1>
+            </div>
+            <div class="status-pill">
+                <span class="status-dot"></span>
+                HEALTHY
+            </div>
+        </div>
+
+        <p class="description">
+            This node simulates the primary cloud application tier running on AWS infrastructure within the TwinCloud Ops Disaster Recovery platform.
+        </p>
+
+        <div class="grid">
+            <div class="grid-item">
+                <div class="label">Cloud Provider</div>
+                <div class="value">Amazon Web Services</div>
+            </div>
+            <div class="grid-item">
+                <div class="label">Simulated Region</div>
+                <div class="value">us-east-1</div>
+            </div>
+            <div class="grid-item">
+                <div class="label">Cluster Role</div>
+                <div class="value">Primary (Active)</div>
+            </div>
+            <div class="grid-item">
+                <div class="label">Exposed Port</div>
+                <div class="value">8081 (Container: 80)</div>
+            </div>
+            <div class="grid-item" style="grid-column: span 2;">
+                <div class="label">Health Check Endpoint</div>
+                <a class="api-link" href="/health.json">GET /health.json</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            TwinCloud Ops &bull; Zero-Cloud-Cost DR Simulation Platform
+        </div>
+    </div>
+</body>
+</html>
