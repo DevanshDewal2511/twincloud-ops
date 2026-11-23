@@ -20,6 +20,9 @@ AWS_DIRECT_URL = "http://localhost:8081"
 AZURE_DIRECT_URL = "http://localhost:8082"
 
 
+DEMO_KEY = "twincloud-demo-2026"
+
+
 def http_get(url: str, timeout: float = 3.0):
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "TwinCloud-ChaosRunner/1.0"})
@@ -34,7 +37,11 @@ def http_get(url: str, timeout: float = 3.0):
 
 def http_post(url: str, timeout: float = 3.0):
     try:
-        req = urllib.request.Request(url, data=b"", headers={"User-Agent": "TwinCloud-ChaosRunner/1.0"}, method="POST")
+        headers = {
+            "User-Agent": "TwinCloud-ChaosRunner/1.0",
+            "X-Demo-Key": DEMO_KEY,
+        }
+        req = urllib.request.Request(url, data=b"", headers=headers, method="POST")
         with urllib.request.urlopen(req, timeout=timeout) as response:
             data = response.read().decode("utf-8")
             return response.status, data

@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 client = TestClient(app)
+VALID_KEY = "twincloud-demo-2026"
 
 
 def test_root_endpoint():
@@ -36,15 +37,24 @@ def test_metrics_endpoint():
     assert "availability_percentage" in data
 
 
-def test_simulation_lifecycle():
-    # Trigger simulated outage
-    res_outage = client.post("/api/simulate/outage?node=aws-primary")
+def test_unauthorized_simulation_access():
+    # Attempt mutation without key -> must fail with 401
+    res_unauthorized = client.post("/api/simulate/outage?node=aws-primary")
+    assert res_unauthorized.status_code == 401
+    assert "Unauthorized" in res_unauthorized.json()["detail"]
+
+
+def test_authorized_simulation_lifecycle():
+    headers = {"X-Demo-Key": VALID_KEY}
+
+    # Trigger simulated outage with valid key
+    res_outage = client.post("/api/simulate/outage?node=aws-primary", headers=headers)
     assert res_outage.status_code == 200
     assert res_outage.json()["status"] == "SUCCESS"
     assert res_outage.json()["action"] == "SIMULATED_OUTAGE_TRIGGERED"
 
-    # Trigger simulated recovery
-    res_recover = client.post("/api/simulate/recover?node=aws-primary")
+    # Trigger simulated recovery with valid key
+    res_recover = client.post("/api/simulate/recover?node=aws-primary", headers=headers)
     assert res_recover.status_code == 200
     assert res_recover.json()["status"] == "SUCCESS"
     assert res_recover.json()["action"] == "SIMULATED_RECOVERY_TRIGGERED"

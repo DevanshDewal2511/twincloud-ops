@@ -12,10 +12,10 @@ import {
   ExternalLink, 
   Flame, 
   Zap, 
-  RotateCcw,
   Database,
-  Play,
-  RotateCw
+  RotateCw,
+  KeyRound,
+  ShieldCheck
 } from 'lucide-react';
 
 export default function App() {
@@ -28,6 +28,8 @@ export default function App() {
   const [error, setError] = useState(null);
   const [drillLoading, setDrillLoading] = useState(false);
   const [drillMessage, setDrillMessage] = useState(null);
+  const [demoKey, setDemoKey] = useState(sessionStorage.getItem('twincloud_demo_key') || 'twincloud-demo-2026');
+  const [isEditingKey, setIsEditingKey] = useState(false);
 
   const fetchTelemetry = async () => {
     try {
@@ -63,13 +65,45 @@ export default function App() {
     return () => clearInterval(interval);
   }, [autoRefresh]);
 
+  const handleKeyChange = (newKey) => {
+    setDemoKey(newKey);
+    sessionStorage.setItem('twincloud_demo_key', newKey);
+  };
+
   const triggerDrill = async (action, node = 'aws-primary') => {
     setDrillLoading(true);
     setDrillMessage(null);
     try {
       const endpoint = action === 'outage' ? '/api/simulate/outage' : '/api/simulate/recover';
-      const res = await fetch(`${endpoint}?node=${encodeURIComponent(node)}`, { method: 'POST' });
-      if (!res.ok) throw new Error(`Failed to trigger ${action}`);
+      const res = await fetch(`${endpoint}?node=${encodeURIComponent(node)}`, { 
+        method: 'POST',
+        headers: {
+          'X-Demo-Key': demoKey || '',
+        }
+      });
+
+      if (res.status === 401) {
+        setDrillMessage({
+          type: 'error',
+          text: '🔒 Unauthorized: Enter a valid Demo Key in the key badge to trigger disaster recovery controls.'
+        });
+        setIsEditingKey(true);
+        return;
+      }
+
+      if (res.status === 429) {
+        setDrillMessage({
+          type: 'warning',
+          text: '⏳ Rate limit exceeded: Please wait 2 seconds between drill commands.'
+        });
+        return;
+      }
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.detail || `Action failed with HTTP status ${res.status}`);
+      }
+
       const data = await res.json();
       setDrillMessage({
         type: action === 'outage' ? 'warning' : 'success',
@@ -82,7 +116,7 @@ export default function App() {
       setDrillMessage({ type: 'error', text: err.message });
     } finally {
       setDrillLoading(false);
-      setTimeout(() => setDrillMessage(null), 5000);
+      setTimeout(() => setDrillMessage(null), 6000);
     }
   };
 
@@ -107,7 +141,7 @@ export default function App() {
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-bold tracking-tight text-white">TwinCloud Ops</h1>
                 <span className="text-xs bg-slate-800 border border-slate-700 text-slate-300 px-2 py-0.5 rounded-full font-mono">
-                  v1.1.0 Full-Stack DR
+                  v1.2.0 Demo Ready
                 </span>
                 <span className="text-xs bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 px-2 py-0.5 rounded-full font-mono flex items-center gap-1">
                   <Database className="w-3 h-3" /> PostgreSQL
@@ -122,6 +156,30 @@ export default function App() {
 
         {/* Global Controls & Status */}
         <div className="flex flex-wrap items-center gap-3">
+          {/* Demo Key Auth Badge */}
+          <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg text-xs font-mono">
+            <KeyRound className="w-3.5 h-3.5 text-amber-400" />
+            {isEditingKey ? (
+              <input
+                type="password"
+                value={demoKey}
+                onChange={(e) => handleKeyChange(e.target.value)}
+                onBlur={() => setIsEditingKey(false)}
+                placeholder="Enter Demo Key"
+                autoFocus
+                className="bg-slate-950 border border-slate-700 rounded px-2 py-0.5 text-xs text-white focus:outline-none focus:border-amber-400 w-32"
+              />
+            ) : (
+              <button 
+                onClick={() => setIsEditingKey(true)}
+                title="Click to change Demo Control Key"
+                className="text-slate-300 hover:text-amber-400 flex items-center gap-1 cursor-pointer"
+              >
+                Key: {demoKey ? '••••••••' : 'None'}
+              </button>
+            )}
+          </div>
+
           {/* Overall Health Pill */}
           <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-semibold uppercase tracking-wider backdrop-blur-md"
             style={{
@@ -136,7 +194,7 @@ export default function App() {
           {/* Auto Refresh Toggle */}
           <button
             onClick={() => setAutoRefresh(!autoRefresh)}
-            className={`px-3 py-1.5 rounded-lg border text-xs font-medium flex items-center gap-1.5 transition-colors ${
+            className={`px-3 py-1.5 rounded-lg border text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
               autoRefresh 
                 ? 'bg-slate-800 border-emerald-500/40 text-emerald-400' 
                 : 'bg-slate-900 border-slate-800 text-slate-400'
@@ -149,7 +207,7 @@ export default function App() {
           {/* Manual Refresh */}
           <button
             onClick={fetchTelemetry}
-            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-medium text-slate-200 flex items-center gap-1.5 transition-all"
+            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-medium text-slate-200 flex items-center gap-1.5 transition-all cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             Refresh
@@ -224,6 +282,9 @@ export default function App() {
               <div className="flex items-center gap-2">
                 <Flame className="w-5 h-5 text-orange-400" />
                 <h2 className="text-base font-bold text-white">Disaster Recovery Drill Command Center</h2>
+                <span className="text-[10px] bg-slate-800 border border-slate-700 text-slate-300 px-2 py-0.5 rounded-full font-mono flex items-center gap-1">
+                  <ShieldCheck className="w-3 h-3 text-emerald-400" /> Protected Endpoint
+                </span>
               </div>
               <p className="text-xs text-slate-400 mt-1">
                 Execute controlled multi-cloud chaos simulations with automatic failover tracking and RTO recording.
@@ -282,7 +343,7 @@ export default function App() {
                 </span>
               </div>
               <div className="mt-3 flex items-center justify-between text-xs text-slate-400">
-                <span>Entry: <strong className="text-slate-200 font-mono">localhost:8080</strong></span>
+                <span>Entry: <a href="/traffic/" target="_blank" rel="noreferrer" className="text-cyan-400 font-mono hover:underline inline-flex items-center gap-1">/traffic/ (Live Proxy) <ExternalLink className="w-2.5 h-2.5" /></a></span>
                 <span>Active Upstream: <strong className="text-amber-400 font-mono">{activeTarget || 'Resolving...'}</strong></span>
                 <span>Ping: <strong className="text-slate-200 font-mono">{proxyNode?.latency_ms || 0}ms</strong></span>
               </div>
@@ -327,8 +388,8 @@ export default function App() {
 
               <div className="mt-5 grid grid-cols-2 gap-3 text-xs bg-slate-950/60 p-3 rounded-lg border border-slate-800/80">
                 <div>
-                  <span className="text-slate-500 block">Exposed Port</span>
-                  <span className="font-mono text-slate-200 font-semibold">8081</span>
+                  <span className="text-slate-500 block">Endpoint Route</span>
+                  <span className="font-mono text-slate-200 font-semibold">/nodes/aws/</span>
                 </div>
                 <div>
                   <span className="text-slate-500 block">Probe Latency</span>
@@ -346,10 +407,10 @@ export default function App() {
 
               <div className="mt-4 flex items-center justify-between pt-3 border-t border-slate-800 text-xs">
                 <a 
-                  href="http://localhost:8081" 
+                  href="/nodes/aws/" 
                   target="_blank" 
                   rel="noreferrer"
-                  className="text-amber-400 hover:text-amber-300 flex items-center gap-1 hover:underline"
+                  className="text-amber-400 hover:text-amber-300 flex items-center gap-1 hover:underline font-medium"
                 >
                   Direct AWS Node <ExternalLink className="w-3 h-3" />
                 </a>
@@ -392,8 +453,8 @@ export default function App() {
 
               <div className="mt-5 grid grid-cols-2 gap-3 text-xs bg-slate-950/60 p-3 rounded-lg border border-slate-800/80">
                 <div>
-                  <span className="text-slate-500 block">Exposed Port</span>
-                  <span className="font-mono text-slate-200 font-semibold">8082</span>
+                  <span className="text-slate-500 block">Endpoint Route</span>
+                  <span className="font-mono text-slate-200 font-semibold">/nodes/azure/</span>
                 </div>
                 <div>
                   <span className="text-slate-500 block">Probe Latency</span>
@@ -411,10 +472,10 @@ export default function App() {
 
               <div className="mt-4 flex items-center justify-between pt-3 border-t border-slate-800 text-xs">
                 <a 
-                  href="http://localhost:8082" 
+                  href="/nodes/azure/" 
                   target="_blank" 
                   rel="noreferrer"
-                  className="text-blue-400 hover:text-blue-300 flex items-center gap-1 hover:underline"
+                  className="text-blue-400 hover:text-blue-300 flex items-center gap-1 hover:underline font-medium"
                 >
                   Direct Azure Node <ExternalLink className="w-3 h-3" />
                 </a>
