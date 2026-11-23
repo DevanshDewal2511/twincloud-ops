@@ -3,6 +3,7 @@
 ### Zero-Cost Multi-Cloud Disaster Recovery Simulation Platform
 
 [![Docker](https://img.shields.io/badge/Docker-20+-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![CI/CD Pipeline](https://github.com/DevanshDewal2511/twincloud-ops/actions/workflows/ci.yml/badge.svg)](https://github.com/DevanshDewal2511/twincloud-ops/actions/workflows/ci.yml)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-18+-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4+-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
